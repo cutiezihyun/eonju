@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Zone - 핸드폰 제한 & 공부 모드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-green: #1db954;
+            --accent-hover: #1ed760;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background-color 0.5s ease;
+        }
+
+        /* 공부 모드 전환 시 배경 변화 */
+        body.study-mode {
+            background-color: #050b14;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+
+        /* 타이머 디스플레이 */
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        /* 스포티파이 임베드 컨테이너 */
+        .spotify-container {
+            margin: 20px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            min-height: 152px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        iframe {
+            border-radius: 12px;
+            border: none;
+            width: 100%;
+            height: 152px;
+        }
+
+        /* 메인 시작 버튼 */
+        .btn-start {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #000;
+            background-color: var(--accent-green);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px 0 rgba(29, 185, 84, 0.39);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-start:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 rgba(29, 185, 84, 0.5);
+        }
+
+        .btn-start:active {
+            transform: translateY(0);
+        }
+
+        /* 공부 모드 전용 종료 버튼 */
+        .btn-stop {
+            width: 100%;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ef4444;
+            background-color: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .btn-stop:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        /* 공부 모드 실행 중 전체화면 오버레이 (핸드폰 제한 효과) */
+        .lock-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .lock-overlay.active {
+            display: flex;
+        }
+
+        .lock-card {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: rgba(29, 185, 84, 0.15);
+            color: var(--accent-green);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid rgba(29, 185, 84, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .notice-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        /* 안내 모달/팁 */
+        .tip-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 기본 인터페이스 -->
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <h1>🔥 Focus Zone</h1>
+            <p>핸드폰을 내려놓고 몰입의 시간을 시작하세요</p>
+        </div>
+
+        <div class="timer-display" id="timer">25:00</div>
+
+        <!-- Spotify 플레이어 연동 (기본 Lo-Fi 플레이리스트) -->
+        <div class="spotify-container">
+            <iframe id="spotifyPlayer" 
+                src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8U21A2f3A25?utm_source=generator&theme=0" 
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                loading="lazy">
+            </iframe>
+        </div>
+
+        <button class="btn-start" id="startBtn" onclick="enterStudyMode()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            핸드폰 제한 & 공부 모드 시작
+        </button>
+
+        <div class="tip-box">
+            💡 <b>팁:</b> 스포티파이 정책상 첫 재생은 위 플레이어의 ▶ 버튼을 직접 눌러주시면 모드 진입 후 계속 음악이 흐릅니다.
+        </div>
+    </div>
+
+    <!-- 핸드폰 제한 모드 (전체 화면 오버레이) -->
+    <div class="lock-overlay" id="lockOverlay">
+        <div class="lock-card">
+            <div class="status-badge">
+                <span class="status-dot"></span> 핸드폰 제한 모드 작동 중
+            </div>
+
+            <h2 style="font-size: 1.8rem; margin-bottom: 10px;">집중하고 있는 시간</h2>
+            <div class="timer-display" id="overlayTimer" style="font-size: 4.5rem; color: #1db954;">25:00</div>
+
+            <!-- 공부 모드 전용 스포티파이 플레이어 위치 -->
+            <div id="overlaySpotifyContainer" class="spotify-container"></div>
+
+            <button class="btn-stop" id="stopBtn" onclick="exitStudyMode()">공부 모드 종료하기</button>
+
+            <p class="notice-text">
+                이 창을 닫거나 다른 앱으로 전환하지 마세요.<br>
+                음악을 들으며 오직 현재 학습에만 집중하세요!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval = null;
+        let totalSeconds = 25 * 60; // 기본 25분 (원하는 시간으로 변경 가능)
+        let isRunning = false;
+
+        const timerDisplay = document.getElementById('timer');
+        const overlayTimerDisplay = document.getElementById('overlayTimer');
+        const lockOverlay = document.getElementById('lockOverlay');
+        const spotifyPlayer = document.getElementById('spotifyPlayer');
+        const overlaySpotifyContainer = document.getElementById('overlaySpotifyContainer');
+        const mainSpotifyContainer = document.querySelector('.container .spotify-container');
+
+        // 시간 포맷 (MM:SS)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // 공부 모드 시작
+        function enterStudyMode() {
+            // 스포티파이 플레이어를 오버레이로 이동 (음악 계속 재생 유지)
+            overlaySpotifyContainer.appendChild(spotifyPlayer);
+            
+            // 오버레이 활성화 & 공부 모드 배경 적용
+            lockOverlay.classList.add('active');
+            document.body.classList.add('study-mode');
+            
+            // 타이머 시작
+            if (!isRunning) {
+                isRunning = true;
+                timerInterval = setInterval(() => {
+                    if (totalSeconds > 0) {
+                        totalSeconds--;
+                        const formatted = formatTime(totalSeconds);
+                        timerDisplay.textContent = formatted;
+                        overlayTimerDisplay.textContent = formatted;
+                    } else {
+                        clearInterval(timerInterval);
+                        alert("🎉 축하합니다! 집중 시간이 완료되었습니다.");
+                        exitStudyMode();
+                    }
+                }, 1000);
+            }
+
+            // 웹페이지 이탈 방지 경고
+            window.onbeforeunload = function() {
+                return "공부 모드가 진행 중입니다. 정말 나가시겠습니까?";
+            };
+        }
+
+        // 공부 모드 종료
+        function exitStudyMode() {
+            if (confirm("정말로 공부 모드를 종료하시겠습니까?")) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                totalSeconds = 25 * 60; // 타이머 리셋
+                
+                const formatted = formatTime(totalSeconds);
+                timerDisplay.textContent = formatted;
+                overlayTimerDisplay.textContent = formatted;
+
+                // 스포티파이 플레이어 원위치
+                mainSpotifyContainer.appendChild(spotifyPlayer);
+
+                // 오버레이 비활성화
+                lockOverlay.classList.remove('active');
+                document.body.classList.remove('study-mode');
+
+                window.onbeforeunload = null;
+            }
+        }
+    </script>
+</body>
+</html>
