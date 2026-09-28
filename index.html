@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CozyFocus - 뽀로와 함께하는 힐링 스크린타임 케어</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>\\
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cozy: {
+                            bg: '#FAF7F2',
+                            card: '#FFFFFF',
+                            lavender: '#E8E5F8',
+                            peach: '#FFE7DF',
+                            mint: '#E2F3EC',
+                            yellow: '#FFF3D6',
+                            purple: '#9085C9',
+                            rose: '#F08080',
+                            green: '#58A182',
+                            brown: '#7A5C45',
+                            text: '#4A3E3D',
+                            subtext: '#8C7B70'
+                        }
+                    },
+                    borderRadius: {
+                        '3xl': '1.75rem',
+                        '4xl': '2.25rem'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Gaegu & Gowun Dodum -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Gowun Dodum', sans-serif;
+            background-color: #FAF7F2;
+            color: #4A3E3D;
+        }
+        .font-cute {
+            font-family: 'Gaegu', cursive;
+        }
+        .cozy-shadow {
+            box-shadow: 0 10px 25px -5px rgba(122, 92, 69, 0.08), 0 8px 10px -6px rgba(122, 92, 69, 0.04);
+        }
+        .cozy-card {
+            background: #FFFFFF;
+            border: 2px solid #F0EAE1;
+            border-radius: 1.75rem;
+        }
+        .cozy-btn {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .cozy-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+        }
+        .cozy-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        .animate-poro {
+            animation: floatSlow 3.5s ease-in-out infinite;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #E8DFD5;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-6 flex justify-center items-start">
+
+    <div class="w-full max-w-6xl space-y-6">
+
+        <!-- Top Header & Pet Status Card -->
+        <header class="cozy-card p-5 md:p-6 bg-gradient-to-r from-cozy-peach/60 via-cozy-yellow/50 to-cozy-mint/60 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+            <!-- Decorative Acorn Background Floating -->
+            <div class="absolute -right-6 -bottom-6 text-9xl opacity-10 pointer-events-none select-none">🐿️</div>
+
+            <div class="flex items-center gap-4 z-10">
+                <!-- Pet Avatar -->
+                <div class="relative">
+                    <div class="w-20 h-20 md:w-24 md:h-24 bg-white rounded-3xl border-4 border-cozy-brown/20 flex items-center justify-center text-4xl md:text-5xl shadow-md animate-poro cursor-pointer hover:rotate-6 transition" onclick="petPoro()" title="뽀로 쓰다듬기!">
+                        <span id="poro-avatar-emoji">🐿️</span>
+                    </div>
+                    <span id="poro-hat-badge" class="absolute -top-2 -right-2 text-xl bg-white rounded-full p-1 border shadow-sm">👑</span>
+                </div>
+
+                <!-- Pet Dialog & Greeting -->
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/90 rounded-full border border-cozy-brown/10 text-xs font-bold text-cozy-brown shadow-sm mb-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="poro-mood-text">뽀로가 평화롭게 다람쥐 차를 마시는 중 🍵</span>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold font-cute text-cozy-brown tracking-wide">
+                        CozyFocus <span class="text-lg text-cozy-subtext font-normal font-sans">| 뽀로의 숲속 집</span>
+                    </h1>
+                    <p class="text-xs md:text-sm text-cozy-subtext mt-0.5">
+                        억지로 통제하기보다 차근차근, 마음을 다독이는 디지털 습관 공간이에요.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Acorn Wallet & Simulation Trigger -->
+            <div class="flex flex-wrap items-center gap-3 z-10 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-2 bg-white/90 px-4 py-2.5 rounded-2xl border border-amber-200 shadow-sm">
+                    <span class="text-2xl">🌰</span>
+                    <div>
+                        <div class="text-[10px] text-cozy-subtext font-bold uppercase">모은 도토리</div>
+                        <div id="acorn-count" class="text-lg font-bold text-cozy-brown font-cute leading-none">120개</div>
+                    </div>
+                </div>
+
+                <button onclick="openBypassModal('네이버 웨일 인앱 팝업')" class="cozy-btn px-4 py-2.5 bg-cozy-rose text-white rounded-2xl font-bold text-xs shadow-sm flex items-center gap-2 border border-rose-300">
+                    <span>🌰</span> 우회 딴짓 테스트
+                </button>
+
+                <button onclick="openShopModal()" class="cozy-btn px-4 py-2.5 bg-cozy-purple text-white rounded-2xl font-bold text-xs shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-store"></i> 뽀로 상점
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Device Selector Tabs -->
+                <div class="cozy-card p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-cozy-brown/10 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">📱</span>
+                            <h2 class="font-bold text-lg text-cozy-brown">내 기기별 디지털 하루</h2>
+                        </div>
+                        <span class="text-xs text-cozy-subtext bg-cozy-yellow/60 px-3 py-1 rounded-full border border-amber-200">
+                            총 3개 디바이스 연결 중
+                        </span>
+                    </div>
+
+                    <!-- Tabs Button -->
+                    <div id="device-tab-bar" class="flex gap-2 overflow-x-auto pb-1">
+                        <!-- Dynamic Device Buttons -->
+                    </div>
+
+                    <!-- Active Device Usage Summary Card -->
+                    <div id="device-summary-box" class="p-4 rounded-2xl bg-cozy-lavender/40 border border-cozy-purple/20 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Smart Bypass Prevention Section -->
+                <div class="cozy-card p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cozy-brown/10 pb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">🛡️</span>
+                                <h2 class="font-bold text-lg text-cozy-brown">지능형 딴짓 예방 안심 가드</h2>
+                            </div>
+                            <p class="text-xs text-cozy-subtext mt-0.5">
+                                웨일 웹뷰, 애니데스크 팝업, 중국 우회 사이트 접속을 다정하게 가로막아줍니다.
+                            </p>
+                        </div>
+                        <span class="text-xs font-bold text-cozy-green bg-cozy-mint px-3 py-1 rounded-full self-start sm:self-auto">
+                            스마트 방화벽 정상 작동 중
+                        </span>
+                    </div>
+
+                    <!-- Toggles List -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5" id="bypass-guard-list">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Weekly Focus & Habits Chart -->
+                <div class="cozy-card p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">📊</span>
+                            <h2 class="font-bold text-lg text-cozy-brown">이번 주 뽀로와 함께한 몰입 기록</h2>
+                        </div>
+                        <div class="text-xs text-cozy-subtext flex items-center gap-3">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-cozy-purple inline-block"></span> 집중 몰입</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-cozy-rose/60 inline-block"></span> 딴짓 차단</span>
+                        </div>
+                    </div>
+                    <div class="relative h-52">
+                        <canvas id="habitChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="space-y-6">
+
+                <!-- Pomodoro Cozy Focus Timer -->
+                <div class="cozy-card p-6 bg-gradient-to-b from-white to-cozy-yellow/30 text-center space-y-4 relative">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-cozy-yellow rounded-full text-xs font-bold text-cozy-brown border border-amber-300">
+                        <i class="fa-solid fa-clock text-amber-600"></i> 뽀모도로 포커스 타임
+                    </div>
+
+                    <!-- Timer Display -->
+                    <div class="py-2">
+                        <div id="timer-display" class="text-5xl font-black font-cute text-cozy-brown tracking-wider my-1">
+                            25:00
+                        </div>
+                        <p id="timer-status-text" class="text-xs text-cozy-subtext">
+                            버튼을 누르고 집중을 시작하면 도토리가 적립돼요!
+                        </p>
+                    </div>
+
+                    <!-- Timer Controls -->
+                    <div class="flex justify-center gap-2">
+                        <button id="timer-toggle-btn" onclick="toggleTimer()" class="cozy-btn px-6 py-2.5 bg-cozy-green text-white font-bold text-xs rounded-2xl shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-play"></i> <span id="timer-btn-text">집중 시작</span>
+                        </button>
+                        <button onclick="resetTimer()" class="cozy-btn px-4 py-2.5 bg-gray-100 text-cozy-brown font-bold text-xs rounded-2xl border hover:bg-gray-200">
+                            리셋
+                        </button>
+                    </div>
+
+                    <!-- White Noise Ambient Audio Player -->
+                    <div class="pt-3 border-t border-cozy-brown/10 text-left space-y-2">
+                        <span class="text-xs font-bold text-cozy-brown flex items-center gap-1.5">
+                            <i class="fa-solid fa-headphones text-cozy-purple"></i> 숲속 백색소음 앰비언트
+                        </span>
+                        <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+                            <button onclick="playAmbient('rain')" id="amb-rain" class="amb-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 font-bold hover:bg-cozy-lavender/50 text-center">
+                                🌧️ 빗소리
+                            </button>
+                            <button onclick="playAmbient('forest')" id="amb-forest" class="amb-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 font-bold hover:bg-cozy-mint/50 text-center">
+                                🌿 숲속 바람
+                            </button>
+                            <button onclick="playAmbient('lofi')" id="amb-lofi" class="amb-btn p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 font-bold hover:bg-cozy-yellow/50 text-center">
+                                ☕ 멜로디
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Warm Prevention Log -->
+                <div class="cozy-card p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-cozy-brown/10 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">💌</span>
+                            <h3 class="font-bold text-sm text-cozy-brown">뽀로의 다정한 방어 일지</h3>
+                        </div>
+                        <span id="log-count-tag" class="text-[10px] bg-cozy-peach text-cozy-rose font-bold px-2 py-0.5 rounded-full">
+                            오늘 4건 다독임
+                        </span>
+                    </div>
+
+                    <div id="prevention-logs" class="space-y-2.5 max-h-60 overflow-y-auto custom-scroll text-xs">
+                        <!-- Dynamic Logs -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal 1: Cute Bypass Intercept & Cooldown Modal -->
+    <div id="bypass-modal" class="fixed inset-0 bg-cozy-brown/40 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="cozy-card bg-white p-6 rounded-4xl max-w-md w-full shadow-2xl relative border-4 border-cozy-peach space-y-4 animate-poro">
+            
+            <button onclick="closeBypassModal()" class="absolute top-4 right-4 text-cozy-subtext hover:text-cozy-brown text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Cute Header -->
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-cozy-peach/80 rounded-full flex items-center justify-center text-3xl mx-auto border-2 border-cozy-rose/30">
+                    🐿️
+                </div>
+                <div class="inline-block px-3 py-1 bg-cozy-rose/10 text-cozy-rose rounded-full text-xs font-bold border border-cozy-rose/20">
+                    우회 딴짓 경로를 감싸안았어요!
+                </div>
+                <h3 class="text-xl font-bold font-cute text-cozy-brown">
+                    "쿵! 뽀로가 밤재배하러 도망쳤어요! 🌰"
+                </h3>
+                <p id="modal-cause-text" class="text-xs text-cozy-subtext leading-relaxed">
+                    [네이버 웨일 인앱 팝업]에서 인스타그램으로 이동하려는 손가락의 움직임을 발견했어요.
+                </p>
+            </div>
+
+            <!-- Cooldown Action Box -->
+            <div class="bg-cozy-yellow/40 p-4 rounded-2xl border border-amber-200 text-center space-y-3">
+                <div class="text-xs font-bold text-cozy-brown flex items-center justify-center gap-1">
+                    <span>🧘</span> 도파민 10초 숨 고르기
+                </div>
+                <div id="cooldown-timer" class="text-3xl font-black font-cute text-amber-700">
+                    10초
+                </div>
+                <p class="text-[11px] text-cozy-subtext">
+                    깊게 숨을 마시고, 내가 지금 진짜 하고 싶었던 게 뭔지 생각해봐요.
+                </p>
+            </div>
+
+            <!-- Quiz / Gentle Question Prompt -->
+            <div class="bg-cozy-lavender/30 p-3.5 rounded-2xl border border-cozy-purple/20 space-y-2 text-xs">
+                <p id="modal-quiz-title" class="font-bold text-cozy-brown text-center">
+                    💡 뽀로의 상식 퀴즈: 나무에 도토리를 숨기는 다람쥐의 기억력은?
+                </p>
+                <div id="modal-quiz-options" class="grid grid-cols-2 gap-2 font-cute text-sm">
+                    <!-- Dynamic Options -->
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="space-y-2 pt-1">
+                <button onclick="resolveBypassModal(true)" class="cozy-btn w-full py-3 bg-cozy-green text-white font-bold text-xs rounded-2xl shadow-sm flex items-center justify-center gap-1.5">
+                    <span>✨</span> 마음 고쳐먹고 학습으로 돌아가기 (+10 도토리!)
+                </button>
+                <button onclick="resolveBypassModal(false)" class="cozy-btn w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-cozy-subtext font-bold text-xs rounded-2xl">
+                    5분만 진짜 머리 식힐게요
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal 2: Poro Shop Modal -->
+    <div id="shop-modal" class="fixed inset-0 bg-cozy-brown/40 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="cozy-card bg-white p-6 rounded-4xl max-w-lg w-full shadow-2xl relative border-4 border-cozy-lavender space-y-4">
+            
+            <button onclick="closeShopModal()" class="absolute top-4 right-4 text-cozy-subtext hover:text-cozy-brown text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-cozy-brown/10 pb-3">
+                <span class="text-3xl">🏬</span>
+                <div>
+                    <h3 class="text-xl font-bold font-cute text-cozy-brown">뽀로의 도토리 옷장 & 상점</h3>
+                    <p class="text-xs text-cozy-subtext">모은 도토리로 뽀로를 예쁘게 꾸며주세요!</p>
+                </div>
+            </div>
+
+            <!-- Shop Items Grid -->
+            <div class="grid grid-cols-2 gap-3" id="shop-items-grid">
+                <!-- Dynamic Shop Items -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // State Management
+        const state = {
+            acorns: 120,
+            activeDeviceId: 'tab-1',
+            equippedHat: '👑',
+            timerSeconds: 1500,
+            timerInterval: null,
+            isTimerRunning: false,
+            cooldownInterval: null,
+            cooldownSeconds: 10,
+            audioCtx: null,
+            activeAmbient: null,
+
+            devices: [
+                { id: 'tab-1', name: '디벗 (교육용 태블릿)', type: 'debot', icon: 'fa-tablet-screen-button', todayTime: '1시간 40분', targetTime: '3시간', status: '안전 케어 중' },
+                { id: 'laptop-1', name: '나의 노트북', type: 'laptop', icon: 'fa-laptop', todayTime: '2시간 10분', targetTime: '4시간', status: '뽀모도로 가동' },
+                { id: 'phone-1', name: '스마트폰', type: 'phone', icon: 'fa-mobile-screen-button', todayTime: '45분', limitTime: '2시간', status: '휴식 모드' }
+            ],
+
+            guards: [
+                { id: 'g1', name: '네이버 웨일 인앱 팝업 안심 차단', icon: '🐋', active: true, desc: '웨일 내부 주소창 및 팝업을 통한 인스타/유튜브 우회 막기' },
+                { id: 'g2', name: '애니데스크 광고 트랩 방지', icon: '🖥️', active: me = true, desc: 'AnyDesk 하단 배너 광고 클릭을 통한 브라우저 리디렉션 차단' },
+                { id: 'g3', name: '중국/해외 우회 미러 프록시 차단', icon: '🌐', active: true, desc: 'Unblocker 미러 사이트 접속 트래픽 즉시 차단' },
+                { id: 'g4', name: '숏폼(쇼츠/릴스) 자동 쿨다운', icon: '🎬', active: true, desc: '무한 스크롤 도파민 중독 방지 10초 명상 팝업' }
+            ],
+
+            logs: [
+                { id: 1, time: '13:42', cause: '네이버 웨일 인앱 팝업', target: 'Instagram Web', icon: '🐋' },
+                { id: 2, time: '12:15', cause: 'AnyDesk 배너 광고', target: 'UnblockTube.cn', icon: '🖥️' },
+                { id: 3, time: '10:05', cause: '중국 무료 프록시 IP', target: 'TikTok Mirror', icon: '🌐' }
+            ],
+
+            shopItems: [
+                { id: 'hat-1', name: '임금님 왕관', emoji: '👑', cost: 0, bought: true },
+                { id: 'hat-2', name: '초록 학사모', emoji: '🎓', cost: 50, bought: false },
+                { id: 'hat-3', name: '화가 베레모', emoji: '🎨', cost: 80, bought: false },
+                { id: 'hat-4', name: '해적 모자', emoji: '🏴‍☠️', cost: 100, bought: false }
+            ],
+
+            quizzes: [
+                { q: "💡 다람쥐가 가을에 묻어둔 도토리 중 실제로 찾아먹는 비율은?", options: ["약 90%", "약 30~40%", "100% 다찾음", "전혀 못찾음"], ans: 1 },
+                { q: "🌿 눈앞의 도파민을 이겨내고 10초간 참아내면 뇌에서 나오는 물질은?", options: ["세로토닌 & 만족감", "아드레날린 폭발", "스트레스 호르몬", "졸음 수면제"], ans: 0 },
+                { q: "📖 집중력을 높이는 뽀모도로 기법의 기본 시간은?", options: ["10분", "25분", "60분", "120분"], ans: 1 }
+            ]
+        };
+
+        // DOM Ready Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDeviceTabs();
+            renderGuards();
+            renderLogs();
+            renderShopItems();
+            initChart();
+        });
+
+        // Render Device Switching Tabs
+        function renderDeviceTabs() {
+            const container = document.getElementById('device-tab-bar');
+            container.innerHTML = state.devices.map(dev => {
+                const isActive = dev.id === state.activeDeviceId;
+                const activeStyle = isActive 
+                    ? 'bg-cozy-purple text-white shadow-sm' 
+                    : 'bg-cozy-lavender/40 text-cozy-brown hover:bg-cozy-lavender/70';
+
+                return `
+                    <button onclick="switchDevice('${dev.id}')" class="px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition shrink-0 ${activeStyle}">
+                        <i class="fa-solid ${dev.icon}"></i>
+                        <span>${dev.name}</span>
+                    </button>
+                `;
+            }).join('');
+
+            // Render Device Summary Box
+            const currentDev = state.devices.find(d => d.id === state.activeDeviceId);
+            const summaryBox = document.getElementById('device-summary-box');
+            summaryBox.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-cozy-purple text-xl shadow-sm border border-cozy-purple/20">
+                        <i class="fa-solid ${currentDev.icon}"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm text-cozy-brown">${currentDev.name} 사용 현황</div>
+                        <div class="text-xs text-cozy-subtext">오늘 권장 사용시간 대비 안전하게 케어 중이에요.</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 text-right">
+                    <div>
+                        <div class="text-[10px] text-cozy-subtext font-bold uppercase">오늘 이용 시간</div>
+                        <div class="text-base font-bold text-cozy-brown font-cute">${currentDev.todayTime}</div>
+                    </div>
+                    <div class="px-3 py-1 bg-white rounded-xl text-xs font-bold text-cozy-green border border-emerald-200">
+                        ${currentDev.status}
+                    </div>
+                </div>
+            `;
+        }
+
+        function switchDevice(id) {
+            state.activeDeviceId = id;
+            renderDeviceTabs();
+        }
+
+        // Render Guard Toggles
+        function renderGuards() {
+            const container = document.getElementById('bypass-guard-list');
+            container.innerHTML = state.guards.map(g => {
+                return `
+                    <div class="p-3.5 rounded-2xl bg-cozy-bg border border-cozy-brown/10 flex items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-1.5 font-bold text-xs text-cozy-brown">
+                                <span>${g.icon}</span> ${g.name}
+                            </div>
+                            <p class="text-[11px] text-cozy-subtext leading-tight">${g.desc}</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer mt-0.5 shrink-0">
+                            <input type="checkbox" ${g.active ? 'checked' : ''} onchange="toggleGuard('${g.id}')" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cozy-green"></div>
+                        </label>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleGuard(id) {
+            const guard = state.guards.find(g => g.id === id);
+            if (guard) guard.active = !guard.active;
+            renderGuards();
+        }
+
+        // Render Warm Logs
+        function renderLogs() {
+            const container = document.getElementById('prevention-logs');
+            container.innerHTML = state.logs.map(log => {
+                return `
+                    <div class="p-2.5 rounded-xl bg-cozy-peach/30 border border-cozy-peach/60 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">${log.icon}</span>
+                            <div>
+                                <span class="font-bold text-cozy-brown">[${log.cause}]</span>
+                                <span class="text-cozy-subtext text-[11px]"> ➔ ${log.target} 방어</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-cozy-subtext">${log.time}</span>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('log-count-tag').textContent = `오늘 ${state.logs.length}건 다독임`;
+        }
+
+        // Pet Poro Interactive
+        function petPoro() {
+            const moods = [
+                "뽀로가 기분 좋아서 꼬리를 흔들어요! 🐿️✨",
+                "뽀로가 볼에 숨겨둔 도토리를 보여줬어요! 🌰",
+                "뽀로가 마음이 차분해졌대요! 🍃",
+                "오늘도 몰입을 응원하고 있어요! 💛"
+            ];
+            const randomMood = moods[Math.floor(Math.random() * moods.length)];
+            document.getElementById('poro-mood-text').textContent = randomMood;
+            
+            const avatar = document.getElementById('poro-avatar-emoji');
+            avatar.classList.add('scale-125');
+            setTimeout(() => avatar.classList.remove('scale-125'), 300);
+        }
+
+        // Open Bypass Cooldown Modal Simulation
+        function openBypassModal(causeText = '네이버 웨일 인앱 팝업') {
+            document.getElementById('modal-cause-text').textContent = `[${causeText}] 경로에서 인스타그램/유튜브로 가려던 순간을 다정하게 가로막았어요!`;
+            
+            // Random Quiz
+            const randomQ = state.quizzes[Math.floor(Math.random() * state.quizzes.length)];
+            document.getElementById('modal-quiz-title').textContent = randomQ.q;
+            document.getElementById('modal-quiz-options').innerHTML = randomQ.options.map((opt, idx) => `
+                <button onclick="checkQuizAns(${idx === randomQ.ans})" class="p-2 rounded-xl bg-white border border-cozy-brown/10 hover:bg-cozy-yellow/60 text-cozy-brown font-bold text-center transition">
+                    ${opt}
+                </button>
+            `).join('');
+
+            // Start 10s Timer
+            state.cooldownSeconds = 10;
+            document.getElementById('cooldown-timer').textContent = `${state.cooldownSeconds}초`;
+            
+            clearInterval(state.cooldownInterval);
+            state.cooldownInterval = setInterval(() => {
+                state.cooldownSeconds--;
+                if (state.cooldownSeconds <= 0) {
+                    clearInterval(state.cooldownInterval);
+                    document.getElementById('cooldown-timer').textContent = "숨 고르기 완료! 🌿";
+                } else {
+                    document.getElementById('cooldown-timer').textContent = `${state.cooldownSeconds}초`;
+                }
+            }, 1000);
+
+            document.getElementById('bypass-modal').classList.remove('hidden');
+        }
+
+        function checkQuizAns(isCorrect) {
+            if (isCorrect) {
+                alert('🎉 정답이에요! 도파민 반사 고리를 성공적으로 끊어냈어요 (+10 도토리!)');
+                addAcorns(10);
+                closeBypassModal();
+            } else {
+                alert('💭 아쉬워요! 마음을 조금 더 가다듬어볼까요?');
+            }
+        }
+
+        function closeBypassModal() {
+            clearInterval(state.cooldownInterval);
+            document.getElementById('bypass-modal').classList.add('hidden');
+        }
+
+        function resolveBypassModal(returnedToFocus) {
+            if (returnedToFocus) {
+                addAcorns(10);
+                // Log event
+                const now = new Date();
+                const timeStr = `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+                state.logs.unshift({
+                    id: Date.now(),
+                    time: timeStr,
+                    cause: '우회 접속 시도 차단',
+                    target: 'Youtube Shorts / Insta',
+                    icon: '🐿️'
+                });
+                renderLogs();
+            }
+            closeBypassModal();
+        }
+
+        function addAcorns(num) {
+            state.acorns += num;
+            document.getElementById('acorn-count').textContent = `${state.acorns}개`;
+        }
+
+        // Shop Functions
+        function openShopModal() {
+            renderShopItems();
+            document.getElementById('shop-modal').classList.remove('hidden');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shop-modal').classList.add('hidden');
+        }
+
+        function renderShopItems() {
+            const grid = document.getElementById('shop-items-grid');
+            grid.innerHTML = state.shopItems.map(item => {
+                const isEquipped = state.equippedHat === item.emoji;
+                return `
+                    <div class="p-3.5 rounded-2xl bg-cozy-bg border border-cozy-brown/10 flex flex-col items-center justify-between space-y-2 text-center">
+                        <div class="text-3xl">${item.emoji}</div>
+                        <div>
+                            <div class="font-bold text-xs text-cozy-brown">${item.name}</div>
+                            <div class="text-[11px] text-cozy-subtext">🌰 ${item.cost} 도토리</div>
+                        </div>
+                        ${item.bought ? `
+                            <button onclick="equipHat('${item.emoji}')" class="w-full py-1.5 rounded-xl font-bold text-xs ${isEquipped ? 'bg-cozy-purple text-white' : 'bg-gray-200 text-cozy-brown'}">
+                                ${isEquipped ? '착용 중' : '착용하기'}
+                            </button>
+                        ` : `
+                            <button onclick="buyHat('${item.id}')" class="w-full py-1.5 bg-cozy-green text-white font-bold text-xs rounded-xl">
+                                구매하기
+                            </button>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function buyHat(id) {
+            const item = state.shopItems.find(i => i.id === id);
+            if (item && state.acorns >= item.cost) {
+                state.acorns -= item.cost;
+                item.bought = true;
+                addAcorns(0);
+                equipHat(item.emoji);
+                renderShopItems();
+            } else {
+                alert('🌰 도토리가 부족해요! 뽀모도로 포커스를 완료해보세요.');
+            }
+        }
+
+        function equipHat(emoji) {
+            state.equippedHat = emoji;
+            document.getElementById('poro-hat-badge').textContent = emoji;
+            renderShopItems();
+        }
+
+        // Timer Logic
+        function toggleTimer() {
+            const btnText = document.getElementById('timer-btn-text');
+            const btnIcon = document.querySelector('#timer-toggle-btn i');
+
+            if (state.isTimerRunning) {
+                clearInterval(state.timerInterval);
+                state.isTimerRunning = false;
+                btnText.textContent = '집중 시작';
+                btnIcon.className = 'fa-solid fa-play';
+                document.getElementById('timer-status-text').textContent = '잠시 일시정지했어요.';
+            } else {
+                state.isTimerRunning = true;
+                btnText.textContent = '일시정지';
+                btnIcon.className = 'fa-solid fa-pause';
+                document.getElementById('timer-status-text').textContent = '뽀로와 함께 집중하는 중이에요! 🍃';
+
+                state.timerInterval = setInterval(() => {
+                    state.timerSeconds--;
+                    updateTimerDisplay();
+
+                    if (state.timerSeconds <= 0) {
+                        clearInterval(state.timerInterval);
+                        state.isTimerRunning = false;
+                        alert('🎉 축하합니다! 25분 집중을 완료해서 20 도토리를 얻었어요! 🌰');
+                        addAcorns(20);
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(state.timerInterval);
+            state.isTimerRunning = false;
+            state.timerSeconds = 1500;
+            updateTimerDisplay();
+            document.getElementById('timer-btn-text').textContent = '집중 시작';
+            document.querySelector('#timer-toggle-btn i').className = 'fa-solid fa-play';
+            document.getElementById('timer-status-text').textContent = '버튼을 누르고 집중을 시작하면 도토리가 적립돼요!';
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(state.timerSeconds / 60);
+            const secs = state.timerSeconds % 60;
+            document.getElementById('timer-display').textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Web Audio Synthesizer for White Noise (Simulated Lofi Ambient)
+        function playAmbient(type) {
+            // Highlight Button
+            document.querySelectorAll('.amb-btn').forEach(b => b.classList.remove('bg-cozy-lavender', 'border-cozy-purple'));
+            
+            if (state.activeAmbient === type) {
+                state.activeAmbient = null;
+                return;
+            }
+
+            state.activeAmbient = type;
+            const btn = document.getElementById(`amb-${type}`);
+            if (btn) btn.classList.add('bg-cozy-lavender', 'border-cozy-purple');
+        }
+
+        // Chart Initialization
+        function initChart() {
+            const ctx = document.getElementById('habitChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['월', '화', '수', '목', '금', '토', '일'],
+                    datasets: [
+                        {
+                            label: '집중 몰입 시간 (시간)',
+                            data: [3.5, 4.2, 5.0, 3.8, 6.1, 2.5, 4.0],
+                            backgroundColor: '#9085C9',
+                            borderRadius: 12
+                        },
+                        {
+                            label: '다독임 차단 건수',
+                            data: [2, 4, 1, 3, 0, 5, 2],
+                            backgroundColor: '#F08080',
+                            borderRadius: 12
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: '#F0EAE1' }, ticks: { precision: 0 } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
